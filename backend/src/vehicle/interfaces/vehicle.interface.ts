@@ -6,4 +6,8 @@ export interface IVehicle {
   availableToTime: string;
   availableDays: string[];
   minimumMinutesBetweenBookings?: number;
+  batteryPack?: string;
+  electricMotorPower?: string;
+  chargerOption?: string;
+  acceleration?: string;
 }

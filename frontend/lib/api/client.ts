@@ -11,12 +11,15 @@ export interface BookingPayload {
 }
 
 export interface BookingResponse {
+  available?: boolean;
   reservation?: {
     _id?: string;
     id?: string;
+    reservationId?: string;
   };
   _id?: string;
   id?: string;
+  reservationId?: string;
   // Error response fields (from NestJS BadRequestException)
   message?: string | string[];
   reason?: string;

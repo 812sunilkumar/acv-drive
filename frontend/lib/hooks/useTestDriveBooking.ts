@@ -45,17 +45,8 @@ export function useTestDriveBooking({ apiBase, onError, onSuccess }: UseTestDriv
   const [loadingLocations, setLoadingLocations] = useState(true);
   const [loadingVehicles, setLoadingVehicles] = useState(false);
 
-  // Auto-dismiss messages after 5 seconds
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => {
-        setMessage('');
-        setIsErrorMessage(false);
-      }, 5000); // 5 seconds
-
-      return () => clearTimeout(timer);
-    }
-  }, [message]);
+  // Note: Auto-dismiss is now handled by Toast component, but we keep this for backward compatibility
+  // Toast will handle the dismissal, so we don't auto-dismiss here to avoid conflicts
 
   // Calculate min and max dates (today and 14 days from today)
   const { minDate, maxDate } = useMemo(() => {
@@ -185,6 +176,8 @@ export function useTestDriveBooking({ apiBase, onError, onSuccess }: UseTestDriv
       
       const { response, data } = await api.book(payload);
       
+      console.log('Booking response:', { status: response.status, data });
+      
       // Check for HTTP errors (backend now throws BadRequestException for unavailable bookings)
       if (!response.ok) { 
         let errorMsg = '';
@@ -203,9 +196,20 @@ export function useTestDriveBooking({ apiBase, onError, onSuccess }: UseTestDriv
         return false; 
       }
       
-      // Success - extract reservation ID
-      const reservationId = data.reservation?._id || data.reservation?.id || data._id || data.id || '';
+      // Success - extract reservation ID (prefer generic reservationId over MongoDB _id)
+      // Handle different response structures from backend
+      // Backend returns: { available: true, reservation: { reservationId: ..., _id: ..., ... } }
+      let reservationId = '';
+      if (data.available && data.reservation) {
+        reservationId = data.reservation.reservationId || data.reservation._id || data.reservation.id || '';
+      } else if (data.reservation) {
+        reservationId = data.reservation.reservationId || data.reservation._id || data.reservation.id || '';
+      } else {
+        reservationId = data.reservationId || data._id || data.id || '';
+      }
+      
       if (!reservationId) {
+        console.warn('No reservation ID found in response:', data);
         const errorMsg = 'Booking failed: No reservation ID received';
         setMessage(errorMsg);
         setIsErrorMessage(true);
@@ -213,7 +217,8 @@ export function useTestDriveBooking({ apiBase, onError, onSuccess }: UseTestDriv
         return false;
       }
       
-      setMessage('Booked successfully! Reservation ID: ' + reservationId);
+      const successMessage = `✅ Booked successfully! Your reservation ID is: ${reservationId}`;
+      setMessage(successMessage);
       setIsErrorMessage(false);
       onSuccessRef.current?.(reservationId);
       

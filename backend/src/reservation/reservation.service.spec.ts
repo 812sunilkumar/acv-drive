@@ -19,6 +19,7 @@ describe('ReservationService', () => {
   };
 
   const mockReservationRepo = {
+    find: jest.fn(),
     findConflicting: jest.fn(),
     create: jest.fn(),
   };
@@ -253,8 +254,10 @@ describe('ReservationService', () => {
       const tomorrow = dayjs.utc().add(1, 'day');
       const validDate = tomorrow.hour(10).minute(0).second(0).millisecond(0).toISOString();
       
+      const mockReservationId = 'TD-2024-ABC123-DEF456';
       reservationRepo.create.mockResolvedValue({
         _id: 'res123',
+        reservationId: mockReservationId,
         vehicleId: 'v1',
         startDateTime: validDate,
         endDateTime: dayjs.utc(validDate).add(45, 'minute').toISOString(),
@@ -262,6 +265,9 @@ describe('ReservationService', () => {
         customerEmail: 'test@example.com',
         customerPhone: '+1234567890',
       } as any);
+      
+      // Mock the find method for generateReservationId
+      reservationRepo.find.mockResolvedValue([]);
 
       const result = await service.checkAndBook(
         'dublin',
@@ -275,7 +281,7 @@ describe('ReservationService', () => {
 
       expect(result.available).toBe(true);
       expect(result.reservation).toBeDefined();
-      expect((result.reservation as any)?._id).toBe('res123');
+      expect((result.reservation as any)?.reservationId).toBe(mockReservationId);
       expect(reservationRepo.create).toHaveBeenCalled();
     });
 

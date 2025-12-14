@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Nevo Test Drive',
-  description: 'Book your test drive with Nevo',
+  title: 'Drive - Electric Vehicle Test Drive Service',
+  description: 'Experience the future of driving. Book your test drive today and discover your perfect electric vehicle across Ireland.',
 };
 
 export default function RootLayout({

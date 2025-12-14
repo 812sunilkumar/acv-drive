@@ -5,6 +5,8 @@ import { ReservationRepository } from './reservation.repository';
 import { VehicleRepository } from '../vehicle/vehicle.repository';
 import { ScheduleReservationDto } from './dto/schedule-reservation.dto';
 
+import { randomBytes } from 'crypto';
+
 dayjs.extend(utc);
 
 interface ValidationResult {
@@ -186,9 +188,18 @@ export class ReservationService {
     }
   }
 
+  private async generateReservationId(): Promise<string> {
+    const year = dayjs().year();
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const random = randomBytes(5).toString('hex').toUpperCase();
+    return `TD-${year}-${timestamp}-${random}`;
+  }
+
   private async createReservation(dto: ScheduleReservationDto) {
     const start = dayjs.utc(dto.startDateTime);
     const end = start.add(dto.durationMins, 'minute');
+    
+    const reservationId = await this.generateReservationId();
 
     return await this.reservationRepo.create({
       vehicleId: dto.vehicleId,
@@ -197,6 +208,7 @@ export class ReservationService {
       customerName: dto.customerName,
       customerEmail: dto.customerEmail,
       customerPhone: dto.customerPhone,
+      reservationId,
     });
   }
 }

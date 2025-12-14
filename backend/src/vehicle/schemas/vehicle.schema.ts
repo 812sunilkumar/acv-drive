@@ -25,6 +25,18 @@ export class Vehicle {
 
   @Prop({ default: 0 })
   minimumMinutesBetweenBookings: number;
+
+  @Prop({ required: false })
+  batteryPack?: string;
+
+  @Prop({ required: false })
+  electricMotorPower?: string;
+
+  @Prop({ required: false })
+  chargerOption?: string;
+
+  @Prop({ required: false })
+  acceleration?: string;
 }
 
 export const VehicleSchema = SchemaFactory.createForClass(Vehicle);

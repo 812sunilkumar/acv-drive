@@ -27,7 +27,7 @@ export default function LocationSelector({
         value={selectedLocation}
         onChange={(e) => onLocationChange(e.target.value)}
         disabled={disabled || loading}
-        className="w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors text-gray-900"
+        className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors text-gray-900"
       >
         <option value="">
           {loading ? 'Loading locations...' : 'Select location'}

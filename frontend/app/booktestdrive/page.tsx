@@ -1,49 +1,88 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useTestDriveBooking } from '../../lib/hooks';
-// Loading component
-// const LoadingSkeleton = ({ height }: { height: string }) => (
-//   <div className={`${height} bg-gray-200 rounded animate-pulse`} />
-// );
+import Navbar from '../../components/Navbar';
+import Toast from '../../components/Toast';
 
-
-// // Only lazy load heavy/non-critical components
-// const VehicleInfo = dynamic(() => import('../../components/VehicleInfo'), {
-//   ssr: false,
-//   loading: () => <LoadingSkeleton height="h-20" />,
-// });
-
-// // Import critical components directly (they're needed immediately)
-// import LocationSelector from '../../components/LocationSelector';
-// import VehicleSelector from '../../components/VehicleSelector';
-// import BookingFormFields from '../../components/BookingFormFields';
-// import BookingButton from '../../components/BookingButton';
-// import MessageDisplay from '../../components/MessageDisplay';
-
-
-// Lazy load components
+// Lazy load components for better performance
 const LocationSelector = dynamic(() => import('../../components/LocationSelector'), {
   loading: () => <div className="h-14 bg-gray-200 rounded animate-pulse" />,
 });
 const VehicleSelector = dynamic(() => import('../../components/VehicleSelector'), {
   loading: () => <div className="h-14 bg-gray-200 rounded animate-pulse" />,
 });
-const VehicleInfo = dynamic(() => import('../../components/VehicleInfo'), {
-  loading: () => <div className="h-20 bg-gray-200 rounded animate-pulse" />,
-});
-const BookingFormFields = dynamic(() => import('../../components/BookingFormFields'), {
-  loading: () => <div className="h-72 bg-gray-200 rounded animate-pulse" />,
-});
 const BookingButton = dynamic(() => import('../../components/BookingButton'), {
   loading: () => <div className="h-10 bg-gray-200 rounded animate-pulse" />,
 });
-const MessageDisplay = dynamic(() => import('../../components/MessageDisplay'), {
-  loading: () => null,
+const VehicleInfo = dynamic(() => import('../../components/VehicleInfo'), {
+  loading: () => <div className="h-40 bg-gray-200 rounded animate-pulse" />,
 });
 
+// Duration options configuration
+const DURATION_OPTIONS = [
+  { value: 30, label: '30 minutes', icon: '⚡' },
+  { value: 60, label: '1 hour', icon: '🚚' },
+  { value: 120, label: '2 hours', icon: '⛰️' },
+  { value: 180, label: '3 hours', icon: '☀️' },
+] as const;
+
+// Form field configuration
+const FORM_FIELDS = {
+  personalInfo: {
+    title: '1. Personal Information',
+    fields: [
+      {
+        name: 'name',
+        label: 'Full Name',
+        type: 'text',
+        placeholder: 'John Doe',
+        icon: '👤',
+        required: true,
+      },
+      {
+        name: 'email',
+        label: 'Email Address',
+        type: 'email',
+        placeholder: 'john@example.com',
+        icon: '✉️',
+        required: true,
+      },
+      {
+        name: 'phone',
+        label: 'Phone Number',
+        type: 'tel',
+        placeholder: '+353 1 784 5678',
+        icon: '📞',
+        required: true,
+      },
+    ],
+  },
+  preferences: {
+    title: '2. Test Drive Preferences',
+    fields: [
+      {
+        name: 'date',
+        label: 'Preferred Date',
+        type: 'date',
+        icon: '📅',
+        required: true,
+      },
+      {
+        name: 'time',
+        label: 'Preferred Time',
+        type: 'time',
+        icon: '⏰',
+        required: true,
+      },
+    ],
+  },
+} as const;
+
 export default function BookTestDrive() {
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; isVisible: boolean } | null>(null);
+
   const {
     locations,
     vehicles,
@@ -73,64 +112,189 @@ export default function BookTestDrive() {
     },
   });
 
+  // Show toast when message changes
+  useEffect(() => {
+    if (message) {
+      setToast({
+        message,
+        type: isErrorMessage ? 'error' : 'success',
+        isVisible: true,
+      });
+    } else {
+      setToast(null);
+    }
+  }, [message, isErrorMessage]);
+
   const handleBooking = async () => {
     await submitBooking();
   };
 
+  const handleCloseToast = () => {
+    setToast(null);
+    setMessage('');
+  };
+
+  const handleInputChange = (field: keyof typeof formData, value: string | number) => {
+    updateFormData({ [field]: value } as Partial<typeof formData>);
+  };
+
   return (
-    <div className="min-h-screen py-8 px-4 bg-gray-50">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Book Test Drive</h1>
-          <p className="text-gray-600">Fill in the details below to schedule your test drive</p>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-md p-6 md:p-8 space-y-6">
-          <div className="space-y-6">
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Select Location & Vehicle</h2>
-              <LocationSelector
-                locations={locations}
-                selectedLocation={selectedLocation}
-                onLocationChange={setSelectedLocation}
-                loading={loadingLocations}
-              />
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <div className="py-12 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Book Your Test Drive</h1>
+            <p className="text-xl text-gray-600">Fill in the details below and we'll get you on the road</p>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <form className="space-y-8" onSubmit={(e) => { e.preventDefault(); handleBooking(); }}>
+              {/* Personal Information Section */}
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">{FORM_FIELDS.personalInfo.title}</h2>
+                <div className="space-y-5">
+                  {FORM_FIELDS.personalInfo.fields.map((field) => (
+                    <div key={field.name}>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {field.label} {field.required && <span className="text-red-500">*</span>}
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                          {field.icon}
+                        </span>
+                        <input
+                          type={field.type}
+                          value={formData[field.name as keyof typeof formData] as string}
+                          onChange={(e) => handleInputChange(field.name, e.target.value)}
+                          placeholder={field.placeholder}
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900 placeholder-gray-400"
+                          required={field.required}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-              <VehicleSelector
-                vehicles={vehicles}
-                selectedVehicle={selectedVehicle}
-                onVehicleChange={setSelectedVehicle}
-                loading={loadingVehicles}
-                disabled={!selectedLocation}
-              />
+              {/* Test Drive Preferences Section */}
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">{FORM_FIELDS.preferences.title}</h2>
+                <div className="space-y-5">
+                  {/* Location Selector */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Location <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">📍</span>
+                      <div className="pl-10">
+                        <LocationSelector
+                          locations={locations}
+                          selectedLocation={selectedLocation}
+                          onLocationChange={setSelectedLocation}
+                          loading={loadingLocations}
+                        />
+                      </div>
+                    </div>
+                  </div>
 
-              {selectedVehicle && <VehicleInfo vehicle={selectedVehicle} />}
-            </div>
+                  {/* Vehicle Selector */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Car Model <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">🚗</span>
+                      <div className="pl-10">
+                        <VehicleSelector
+                          vehicles={vehicles}
+                          selectedVehicle={selectedVehicle}
+                          onVehicleChange={setSelectedVehicle}
+                          loading={loadingVehicles}
+                          disabled={!selectedLocation}
+                        />
+                      </div>
+                    </div>
+                    {selectedVehicle && (
+                      <div className="mt-4">
+                        <VehicleInfo vehicle={selectedVehicle} />
+                      </div>
+                    )}
+                  </div>
 
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Booking Details</h2>
-              <BookingFormFields
-                formData={formData}
-                onFormDataChange={updateFormData}
-                selectedVehicle={selectedVehicle}
-                minDate={minDate}
-                maxDate={maxDate}
-              />
-            </div>
+                  {/* Date and Time Fields */}
+                  {FORM_FIELDS.preferences.fields.map((field) => (
+                    <div key={field.name}>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {field.label} {field.required && <span className="text-red-500">*</span>}
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                          {field.icon}
+                        </span>
+                        <input
+                          type={field.type}
+                          value={formData[field.name as keyof typeof formData] as string}
+                          onChange={(e) => handleInputChange(field.name, e.target.value)}
+                          min={field.name === 'date' ? minDate : undefined}
+                          max={field.name === 'date' ? maxDate : undefined}
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900"
+                          required={field.required}
+                        />
+                      </div>
+                    </div>
+                  ))}
 
-            {isFormValid && (
-              <BookingButton
-                onClick={handleBooking}
-                loading={loading}
-                disabled={false}
-              />
-            )}
+                  {/* Duration Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Test Drive Duration <span className="text-red-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {DURATION_OPTIONS.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => handleInputChange('duration', option.value)}
+                          className={`p-4 border-2 rounded-lg transition-all ${
+                            formData.duration === option.value
+                              ? 'border-indigo-600 bg-indigo-50 text-indigo-900'
+                              : 'border-gray-300 bg-white text-gray-700 hover:border-indigo-300 hover:bg-indigo-50'
+                          }`}
+                        >
+                          <div className="text-2xl mb-2">{option.icon}</div>
+                          <div className="font-semibold">{option.label}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-            <MessageDisplay message={message} isError={isErrorMessage} />
+              {/* Submit Button */}
+              <div className="pt-4">
+                <BookingButton
+                  onClick={handleBooking}
+                  loading={loading}
+                  disabled={!isFormValid}
+                />
+              </div>
+            </form>
           </div>
         </div>
       </div>
+      
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          isVisible={toast.isVisible}
+          onClose={handleCloseToast}
+          duration={5000}
+        />
+      )}
     </div>
   );
 }
-

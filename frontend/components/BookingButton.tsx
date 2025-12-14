@@ -20,7 +20,7 @@ export default function BookingButton({
     <button
       onClick={onClick}
       disabled={loading || disabled}
-      className="w-full px-6 py-3 bg-blue-600 text-white font-semibold text-lg rounded-md hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400 transition-all duration-200 shadow-md hover:shadow-lg disabled:shadow-none"
+      className="w-full px-6 py-4 bg-indigo-900 text-white font-bold text-lg rounded-lg hover:bg-indigo-800 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400 transition-all duration-200 shadow-md hover:shadow-lg disabled:shadow-none"
     >
       {loading ? (
         <span className="flex items-center justify-center">

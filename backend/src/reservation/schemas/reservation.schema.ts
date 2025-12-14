@@ -22,6 +22,9 @@ export class Reservation {
 
   @Prop()
   customerPhone: string;
+
+  @Prop({ required: true, unique: true, index: true })
+  reservationId: string;
 }
 
 export const ReservationSchema = SchemaFactory.createForClass(Reservation);

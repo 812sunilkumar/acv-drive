@@ -9,6 +9,10 @@ export interface Vehicle {
   availableFromTime: string;
   availableToTime: string;
   availableDays: string[];
+  batteryPack?: string;
+  electricMotorPower?: string;
+  chargerOption?: string;
+  acceleration?: string;
 }
 
 export interface BookingFormData {
@@ -38,6 +42,7 @@ export interface ReservationPayload {
 export interface ReservationResponse {
   _id?: string;
   id?: string;
+  reservationId?: string;
   message?: string | string[];
 }
 

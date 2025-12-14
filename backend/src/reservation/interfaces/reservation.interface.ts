@@ -5,4 +5,5 @@ export interface IReservation {
   customerName?: string;
   customerEmail?: string;
   customerPhone?: string;
+  reservationId: string;
 }
