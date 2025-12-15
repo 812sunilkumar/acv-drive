@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { VehicleRepository } from './vehicle.repository';
 import { IVehicle } from './interfaces/vehicle.interface';
 
@@ -10,8 +10,27 @@ export class VehicleService {
     return this.repo.find({ type: type.toLowerCase(), location: location.toLowerCase() });
   }
 
+  /**
+   * Returns unique vehicle types for a location
+   * Removes duplicate vehicle models and returns only one representative per type
+   */
   async listByLocation(location: string): Promise<IVehicle[]> {
-    return this.repo.find({ location: location.toLowerCase() });
+    if (!location) {
+      throw new BadRequestException('location query param is required');
+    }
+    
+    const vehicles = await this.repo.find({ location: location.toLowerCase() });
+    
+    // Group by type and return only the first vehicle of each type
+    const uniqueVehiclesByType = new Map<string, IVehicle>();
+    
+    for (const vehicle of vehicles) {
+      if (!uniqueVehiclesByType.has(vehicle.type)) {
+        uniqueVehiclesByType.set(vehicle.type, vehicle);
+      }
+    }
+    
+    return Array.from(uniqueVehiclesByType.values());
   }
 
   async findAllLocations(): Promise<string[]> {
@@ -19,12 +38,6 @@ export class VehicleService {
     return [...new Set(vehicles.map(v => v.location))].sort();
   }
 
-  // async findAllVehicleTypes(location?: string): Promise<string[]> {
-  //   const filter = location ? { location: location.toLowerCase() } : {};
-  //   const vehicles = await this.repo.find(filter);
-  //   const types = [...new Set(vehicles.map(v => v.type.toLowerCase()))];
-  //   return types.sort();
-  // }
 
   async findById(id: string): Promise<IVehicle | null> {
     return this.repo.findById(id);

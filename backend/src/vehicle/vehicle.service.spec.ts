@@ -60,7 +60,29 @@ describe('VehicleService', () => {
   });
 
   describe('listByLocation', () => {
-    it('should return vehicles filtered by location', async () => {
+    it('should return unique vehicles filtered by location (one per type)', async () => {
+      const mockVehicles = [
+        { id: 'v1', type: 'tesla_model3', location: 'dublin', batteryPack: '60 kWh' },
+        { id: 'v2', type: 'tesla_model3', location: 'dublin', batteryPack: '60 kWh' },
+        { id: 'v3', type: 'tesla_modelx', location: 'dublin', batteryPack: '100 kWh' },
+        { id: 'v4', type: 'bmw_i4', location: 'dublin', batteryPack: '83.9 kWh' },
+      ];
+
+      vehicleRepo.find.mockResolvedValue(mockVehicles as any);
+
+      const result = await service.listByLocation('dublin');
+
+      // Should return only 3 vehicles (one of each type)
+      expect(result).toHaveLength(3);
+      expect(result.map(v => v.type)).toEqual(['tesla_model3', 'tesla_modelx', 'bmw_i4']);
+      
+      // Should return the first occurrence of each type
+      expect(result[0].id).toBe('v1');
+      expect(result[1].id).toBe('v3');
+      expect(result[2].id).toBe('v4');
+    });
+
+    it('should handle single vehicle per type', async () => {
       const mockVehicles = [
         { id: 'v1', type: 'tesla_model3', location: 'dublin' },
         { id: 'v2', type: 'tesla_modelx', location: 'dublin' },
@@ -74,6 +96,10 @@ describe('VehicleService', () => {
       expect(vehicleRepo.find).toHaveBeenCalledWith({
         location: 'dublin',
       });
+    });
+
+    it('should throw error when location is missing', async () => {
+      await expect(service.listByLocation('')).rejects.toThrow('location query param is required');
     });
   });
 
@@ -101,33 +127,6 @@ describe('VehicleService', () => {
       expect(result).toEqual([]);
     });
   });
-
-  // describe('findAllVehicleTypes', () => {
-  //   it('should return unique sorted vehicle types', async () => {
-  //     const mockVehicles = [
-  //       { type: 'tesla_model3' },
-  //       { type: 'tesla_modelx' },
-  //       { type: 'TESLA_MODEL3' },
-  //     ];
-
-  //     vehicleRepo.find.mockResolvedValue(mockVehicles as any);
-
-  //     const result = await service.findAllVehicleTypes();
-
-  //     expect(result).toEqual(['tesla_model3', 'tesla_modelx']);
-  //   });
-
-  //   it('should filter by location when provided', async () => {
-  //     const mockVehicles = [{ type: 'tesla_model3' }];
-  //     vehicleRepo.find.mockResolvedValue(mockVehicles as any);
-
-  //     await service.findAllVehicleTypes('dublin');
-
-  //     expect(vehicleRepo.find).toHaveBeenCalledWith({
-  //       location: 'dublin',
-  //     });
-  //   });
-  // });
 
   describe('findById', () => {
     it('should return vehicle by id', async () => {

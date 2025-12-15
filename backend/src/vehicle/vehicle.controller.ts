@@ -8,21 +8,14 @@ export class VehicleController {
     private service: VehicleService,
     private vehicleRepo: VehicleRepository,
   ) {}
-  // this api is being called
+  
   @Get('locations')
   async getLocations() {
     return { locations: await this.service.findAllLocations() };
   }
 
   @Get()
-  async list(@Query('type') type: string, @Query('location') location: string) {
-    if (type && location) {
-      return this.service.listByTypeAndLocation(type, location);
-    }
-    if (location) {
-      return this.service.listByLocation(location);
-    }
-    // Return all vehicles if no filters
-    return this.vehicleRepo.find();
+  async list(@Query('location') location: string) {
+    return this.service.listByLocation(location);
   }
 }

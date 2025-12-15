@@ -242,14 +242,52 @@ describe('Reservation E2E', () => {
         .query({ location: 'dublin' });
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
+      
+      // Verify uniqueness - no duplicate vehicle types
+      const types = res.body.map((v: any) => v.type);
+      const uniqueTypes = [...new Set(types)];
+      expect(types.length).toBe(uniqueTypes.length);
     });
 
-    it('should return vehicles filtered by type and location', async () => {
+    it('should return unique vehicle types per location', async () => {
       const res = await request(app.getHttpServer())
         .get('/vehicles')
-        .query({ type: 'tesla_model3', location: 'dublin' });
+        .query({ location: 'dublin' });
+      
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
+      
+      // Each vehicle type should appear only once
+      const vehicleTypes = res.body.map((v: any) => v.type);
+      const uniqueVehicleTypes = new Set(vehicleTypes);
+      
+      expect(vehicleTypes.length).toBe(uniqueVehicleTypes.size);
+      
+      // Each vehicle should have required properties
+      res.body.forEach((vehicle: any) => {
+        expect(vehicle).toHaveProperty('id');
+        expect(vehicle).toHaveProperty('type');
+        expect(vehicle).toHaveProperty('location');
+        expect(vehicle.location).toBe('dublin');
+      });
+    });
+
+    it('should return 400 when location parameter is missing', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/vehicles');
+      
+      expect(res.status).toBe(400);
+      expect(res.body.message).toContain('location query param is required');
+    });
+
+    it('should return empty array for location with no vehicles', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/vehicles')
+        .query({ location: 'nonexistent_location' });
+      
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(0);
     });
   });
 });
