@@ -176,5 +176,5 @@ Seed data: place your `vehicles.json` and `reservations.json` files into `backen
 # requires ts-node or compile the script
 cd backend
 npm install
-node ./scripts/seed.ts
+npm run seed
 ```

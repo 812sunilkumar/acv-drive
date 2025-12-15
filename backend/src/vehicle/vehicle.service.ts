@@ -19,13 +19,12 @@ export class VehicleService {
     return [...new Set(vehicles.map(v => v.location))].sort();
   }
 
-
-  async findAllVehicleTypes(location?: string): Promise<string[]> {
-    const filter = location ? { location: location.toLowerCase() } : {};
-    const vehicles = await this.repo.find(filter);
-    const types = [...new Set(vehicles.map(v => v.type.toLowerCase()))];
-    return types.sort();
-  }
+  // async findAllVehicleTypes(location?: string): Promise<string[]> {
+  //   const filter = location ? { location: location.toLowerCase() } : {};
+  //   const vehicles = await this.repo.find(filter);
+  //   const types = [...new Set(vehicles.map(v => v.type.toLowerCase()))];
+  //   return types.sort();
+  // }
 
   async findById(id: string): Promise<IVehicle | null> {
     return this.repo.findById(id);

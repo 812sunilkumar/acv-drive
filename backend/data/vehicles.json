@@ -15,19 +15,6 @@
         "acceleration": "0-100 km/h in 6.1s"
       },
       {
-        "id": "tesla_model3_dublin_002",
-        "type": "tesla_model3",
-        "location": "dublin",
-        "availableFromTime": "09:00:00",
-        "availableToTime": "17:00:00",
-        "availableDays": ["mon","tue","wed","thu","fri"],
-        "minimumMinutesBetweenBookings": 15,
-        "batteryPack": "60 kWh",
-        "electricMotorPower": "211 kW",
-        "chargerOption": "11 kW AC Charger",
-        "acceleration": "0-100 km/h in 6.1s"
-      },
-      {
         "id": "bmw_i4_dublin_001",
         "type": "bmw_i4",
         "location": "dublin",

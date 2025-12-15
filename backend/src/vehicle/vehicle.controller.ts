@@ -13,11 +13,6 @@ export class VehicleController {
   async getLocations() {
     return { locations: await this.service.findAllLocations() };
   }
-// this is not happening
-  @Get('types')
-  async getVehicleTypes(@Query('location') location?: string) {
-    return { types: await this.service.findAllVehicleTypes(location) };
-  }
 
   @Get()
   async list(@Query('type') type: string, @Query('location') location: string) {

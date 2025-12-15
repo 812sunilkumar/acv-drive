@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useTestDriveBooking } from '../../lib/hooks';
+import { DURATION_OPTIONS, FORM_FIELDS } from '../../constants/testDrive';
 import Navbar from '../../components/Navbar';
 import Toast from '../../components/Toast';
 
@@ -19,66 +20,6 @@ const BookingButton = dynamic(() => import('../../components/BookingButton'), {
 const VehicleInfo = dynamic(() => import('../../components/VehicleInfo'), {
   loading: () => <div className="h-40 bg-gray-200 rounded animate-pulse" />,
 });
-
-// Duration options configuration
-const DURATION_OPTIONS = [
-  { value: 30, label: '30 minutes', icon: '⚡' },
-  { value: 60, label: '1 hour', icon: '🚚' },
-  { value: 120, label: '2 hours', icon: '⛰️' },
-  { value: 180, label: '3 hours', icon: '☀️' },
-] as const;
-
-// Form field configuration
-const FORM_FIELDS = {
-  personalInfo: {
-    title: '1. Personal Information',
-    fields: [
-      {
-        name: 'name',
-        label: 'Full Name',
-        type: 'text',
-        placeholder: 'John Doe',
-        icon: '👤',
-        required: true,
-      },
-      {
-        name: 'email',
-        label: 'Email Address',
-        type: 'email',
-        placeholder: 'john@example.com',
-        icon: '✉️',
-        required: true,
-      },
-      {
-        name: 'phone',
-        label: 'Phone Number',
-        type: 'tel',
-        placeholder: '+353 1 784 5678',
-        icon: '📞',
-        required: true,
-      },
-    ],
-  },
-  preferences: {
-    title: '2. Test Drive Preferences',
-    fields: [
-      {
-        name: 'date',
-        label: 'Preferred Date',
-        type: 'date',
-        icon: '📅',
-        required: true,
-      },
-      {
-        name: 'time',
-        label: 'Preferred Time',
-        type: 'time',
-        icon: '⏰',
-        required: true,
-      },
-    ],
-  },
-} as const;
 
 export default function BookTestDrive() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; isVisible: boolean } | null>(null);
