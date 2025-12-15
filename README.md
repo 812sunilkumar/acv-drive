@@ -169,30 +169,12 @@ npm run test:e2e
 
 **Note:** Frontend tests automatically start the dev server, but you need to ensure the backend is running first.
 
-## CI
-A GitHub Actions workflow is included at `.github/workflows/ci.yml`. It starts a MongoDB docker container in the CI runner for tests.
 
-## Notes & next steps
-- Repositories implement an `AbstractRepository<T>` to allow swapping persistence.
-- Add more unit tests and e2e tests as needed.
-- For production, secure MongoDB credentials and add proper logging & monitoring.
-
-## Docker / Compose
-
-To run everything locally (Mongo + backend + frontend):
-
-```
-# from repo root
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
-docker compose up --build
-```
-
-Seed data: place your `vehicles.json` and `reservations.json` files into `backend/data/` and run:
+Seed data: place your `vehicles.json` and `reservations.json` files into `backend/data/` and run: (sample files are placed in this folder FYR)
 
 ```
 # requires ts-node or compile the script
 cd backend
 npm install
-node -e "require('./dist/scripts/seed.js')" || node ./scripts/seed.ts
+node ./scripts/seed.ts
 ```
