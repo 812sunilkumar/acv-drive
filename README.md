@@ -20,6 +20,13 @@ export MONGO_URI="mongodb://localhost:27017/nevo_test_drive"
 npm run start:dev
 # it runs on port: 5000
 ```
+Seed data: place your `vehicles.json` and `reservations.json` files into `backend/data/` and run: (sample files are placed in this folder FYR)
+
+```
+# requires ts-node or compile the script, open a terminal in the project run the following command 
+cd backend
+npm run seed
+```
 
 ### Frontend
 ```bash
@@ -169,12 +176,3 @@ npm run test:e2e
 
 **Note:** Frontend tests automatically start the dev server, but you need to ensure the backend is running first.
 
-
-Seed data: place your `vehicles.json` and `reservations.json` files into `backend/data/` and run: (sample files are placed in this folder FYR)
-
-```
-# requires ts-node or compile the script
-cd backend
-npm install
-npm run seed
-```
